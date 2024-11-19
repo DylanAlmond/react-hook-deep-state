@@ -1,10 +1,10 @@
-# useDeepState
+# React Deep State
 
 Simple React hook for managing state for objects using dot notation.
 
 ## Table of Contents
 
-- [useDeepState](#usedeepstate)
+- [React Deep State](#react-deep-state)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Installation](#installation)
