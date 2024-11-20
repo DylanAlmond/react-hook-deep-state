@@ -1,10 +1,10 @@
-# React Hooks Deep State
+# React Hook Deep State
 
 Simple React hook for managing state for objects using dot notation.
 
 ## Table of Contents
 
-- [React Hooks Deep State](#react-hooks-deep-state)
+- [React Hook Deep State](#react-hook-deep-state)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Installation](#installation)
@@ -26,13 +26,13 @@ Simple React hook for managing state for objects using dot notation.
 ## Installation
 
 ```bash
-yarn add react-hooks-deep-state
+yarn add react-hook-deep-state
 ```
 
 ## Example Usage
 
 ```tsx
-import useDeepState from 'react-hooks-deep-state';
+import useDeepState from 'react-hook-deep-state';
 
 const defaultUser = {
   details: {
