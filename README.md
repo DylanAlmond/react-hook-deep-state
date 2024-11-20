@@ -26,13 +26,13 @@ Simple React hook for managing state for objects using dot notation.
 ## Installation
 
 ```bash
-yarn add https://github.com/DylanAlmond/react-hooks-deep-state.git
+yarn add react-hooks-deep-state
 ```
 
 ## Example Usage
 
 ```tsx
-import useDeepState from './hooks/useDeepState';
+import useDeepState from 'react-hooks-deep-state';
 
 const defaultUser = {
   details: {
