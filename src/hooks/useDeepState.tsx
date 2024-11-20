@@ -19,11 +19,11 @@ import { useState, useCallback } from 'react';
 
 /**
  * A custom hook for managing deeply nested state objects.
- * @param initialState - The initial state object.
+ * @param initialState - The initial state, optional and can be undefined.
  * @returns An array containing the current state and a function to update it.
  */
-function useDeepState<T extends Record<string, any>>(initialState?: T) {
-  const [state, setState] = useState<T>(initialState || ({} as T));
+function useDeepState<T extends Record<string, any> | any>(initialState?: T) {
+  const [state, setState] = useState<T>(initialState as T);
 
   /**
    * Type guard to check if a value is an object.
@@ -35,39 +35,51 @@ function useDeepState<T extends Record<string, any>>(initialState?: T) {
 
   /**
    * Updates the state at a specific path using dot notation.
-   * @param path - Dot-notated path to the property (e.g., "user.profile.name").
+   * @param path - Dot-notated path to the property (e.g., "user.profile.name"). If empty or undefined, updates the root.
    * @param value - New value to set at the specified path.
    * @param merge - If the property is an object, should we merge the value?
    */
   const setDeepState = useCallback(
-    (path: string /*Paths<T>*/, value: any, merge: boolean = true) => {
+    (path?: string /*Paths<T>*/, value?: any, merge: boolean = true) => {
       setState((prevState) => {
+        // If no path is provided, update the root
+        if (!path) {
+          if (merge && isObject(prevState) && isObject(value)) {
+            return { ...prevState, ...value };
+          }
+          return value as T;
+        }
+
+        // If our state is not an object, replace with the new value
+        if (!isObject(prevState)) {
+          return value;
+        }
+
         const keys = path.split('.') as (keyof any)[];
-        const newState = { ...prevState }; // Shallow clone the root state
-        let current: Record<string, any> = newState; // Explicitly declare mutable reference
+        const newState = structuredClone(prevState); // Deep clone the root state
+        let currentScope: Record<string, any> = newState; // Start at the root of the object
 
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
 
           if (typeof key === 'symbol') {
-            // Handle symbols differently if needed, or skip
             throw new Error('Symbol keys are not supported');
           }
 
           if (i === keys.length - 1) {
-            // Check if we should merge the value into the current object
-            if (merge || !isObject(value)) {
-              current[key] = value;
+            // Check if we should merge the value
+            if (merge && isObject(prevState) && isObject(value)) {
+              currentScope[key] = { ...currentScope[key], ...value };
             } else {
-              current[key] = { ...current[key], ...value };
+              currentScope[key] = value;
             }
           } else {
-            // Check if the current key exists and is an object
-            if (!isObject(current[key])) {
-              current[key] = {}; // Initialize as an empty object if invalid
+            // Initialize the current key as an empty object if it doesn't exist
+            if (!isObject(currentScope[key])) {
+              currentScope[key] = {};
             }
 
-            current = current[key]; // Drill down into the object
+            currentScope = currentScope[key]; // Drill down into the object
           }
         }
 

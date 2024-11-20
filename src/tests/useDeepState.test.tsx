@@ -99,11 +99,43 @@ describe('useDeepState', () => {
     expect(result.current[0]).toBe(defaultValue);
   });
 
-  it('should update the current value by merging', () => {
+  it('should allow the initial state to be undefined', () => {
+    const { result } = renderHook(() => useDeepState(undefined));
+
+    expect(result.current[0]).toBe(undefined);
+  });
+
+  it('should update the existing state to a string', () => {
     const { result } = renderHook(() => useDeepState(defaultValue));
 
     act(() => {
-      result.current[1]('details', { name: 'Dave' }, false);
+      result.current[1]('', 'Hello World!'); // We're modifying the root so pass an empty string
+    });
+
+    expect(result.current[0]).toBe('Hello World!');
+  });
+
+  it('should update the existing value to undefined', () => {
+    const { result } = renderHook(() => useDeepState(defaultValue));
+
+    act(() => {
+      result.current[1]('details.contact', undefined);
+    });
+
+    expect(result.current[0]).toStrictEqual({
+      details: {
+        id: 0,
+        name: 'Bob',
+        contact: undefined
+      }
+    });
+  });
+
+  it('should update the existing value by merging', () => {
+    const { result } = renderHook(() => useDeepState(defaultValue));
+
+    act(() => {
+      result.current[1]('details', { name: 'Dave' }); // `Merge` should be true by default
     });
 
     expect(result.current[0]).toStrictEqual({
@@ -117,11 +149,11 @@ describe('useDeepState', () => {
     });
   });
 
-  it('should update the current value without merging', () => {
+  it('should update the existing value without merging', () => {
     const { result } = renderHook(() => useDeepState(defaultValue));
 
     act(() => {
-      result.current[1]('details', { id: 1, phone: '1234' }, true);
+      result.current[1]('details', { id: 1, phone: '1234' }, false);
     });
 
     expect(result.current[0]).toStrictEqual({
@@ -129,11 +161,11 @@ describe('useDeepState', () => {
     });
   });
 
-  it('should not merge any changes if the current value is not an object', () => {
+  it('should not merge any changes if the existing value is not an object', () => {
     const { result } = renderHook(() => useDeepState(defaultValue));
 
     act(() => {
-      result.current[1]('details.contact.email', 'dave@example.com', true);
+      result.current[1]('details.contact.email', 'dave@example.com'); // `Merge` should be true by default
     });
 
     expect(result.current[0]).toStrictEqual({
