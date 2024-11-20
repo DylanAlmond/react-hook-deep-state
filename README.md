@@ -15,7 +15,6 @@ Simple React hook for managing state for objects using dot notation.
   - [Advanced Features](#advanced-features)
     - [Object Merging](#object-merging)
     - [Override](#override)
-  - [Type Safety](#type-safety)
   - [Notes](#notes)
 
 ## Features
@@ -116,13 +115,6 @@ To replace the current value entirely, set `merge` to `false`:
 // Replaces the 'contact' object with the new one
 updateUser('details.contact', { phone: '123-456-7890' }, true);
 ```
-
-## Type Safety
-
-The hook is strongly typed:
-
-- Pass the expected type `T` for enhanced IntelliSense and type checking.
-- The commented-out `Paths<T>` implementation can further refine type safety for `path` strings.
 
 ## Notes
 
