@@ -32,7 +32,7 @@ yarn add react-hook-deep-state
 ## Example Usage
 
 ```tsx
-import useDeepState from 'react-hook-deep-state';
+import { useDeepState } from 'react-hook-deep-state';
 
 const defaultUser = {
   details: {
