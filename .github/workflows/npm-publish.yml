@@ -18,6 +18,7 @@ jobs:
           node-version: 20
       - run: npm install --force
       - run: npm test
+      - run: npm run build
 
   publish-npm:
     needs: build
