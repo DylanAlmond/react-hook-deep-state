@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/vite-env.d.ts","./src/hooks/usedeepstate.tsx","./src/tests/usedeepstate.test.tsx"],"version":"5.6.3"}
+{"root":["./src/index.ts","./src/util.ts","./src/vite-env.d.ts","./src/hooks/usedeepstate.tsx","./src/tests/usedeepstate.test.tsx"],"version":"5.6.3"}

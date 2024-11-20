@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react';
+import { deepMerge, isObject } from '../util';
 
 // type Join<K, P> = K extends string | number
 //   ? P extends string | number
@@ -26,14 +27,6 @@ function useDeepState<T extends Record<string, any> | any>(initialState?: T) {
   const [state, setState] = useState<T>(initialState as T);
 
   /**
-   * Type guard to check if a value is an object.
-   * @param value - The value to check.
-   * @returns True if the value is an object, false otherwise.
-   */
-  const isObject = (value: any): value is Record<string, any> =>
-    value !== null && typeof value === 'object' && !Array.isArray(value);
-
-  /**
    * Updates the state at a specific path using dot notation.
    * @param path - Dot-notated path to the property (e.g., "user.profile.name"). If empty or undefined, updates the root.
    * @param value - New value to set at the specified path.
@@ -45,7 +38,7 @@ function useDeepState<T extends Record<string, any> | any>(initialState?: T) {
         // If no path is provided, update the root
         if (!path) {
           if (merge && isObject(prevState) && isObject(value)) {
-            return { ...prevState, ...value };
+            return deepMerge({ ...prevState }, value); // Deep merge at the root
           }
           return value as T;
         }
@@ -67,11 +60,11 @@ function useDeepState<T extends Record<string, any> | any>(initialState?: T) {
           }
 
           if (i === keys.length - 1) {
-            // Check if we should merge the value
-            if (merge && isObject(prevState) && isObject(value)) {
-              currentScope[key] = { ...currentScope[key], ...value };
+            // If merging, perform deep merge
+            if (merge && isObject(currentScope[key]) && isObject(value)) {
+              currentScope[key] = deepMerge(currentScope[key], value);
             } else {
-              currentScope[key] = value;
+              currentScope[key] = value; // Otherwise just set the value
             }
           } else {
             // Initialize the current key as an empty object if it doesn't exist
