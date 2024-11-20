@@ -1,10 +1,10 @@
-# React Deep State
+# React Hooks Deep State
 
 Simple React hook for managing state for objects using dot notation.
 
 ## Table of Contents
 
-- [React Deep State](#react-deep-state)
+- [React Hooks Deep State](#react-hooks-deep-state)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Installation](#installation)
@@ -26,7 +26,7 @@ Simple React hook for managing state for objects using dot notation.
 ## Installation
 
 ```bash
-yarn add https://github.com/DylanAlmond/useDeepState.git
+yarn add https://github.com/DylanAlmond/react-hooks-deep-state.git
 ```
 
 ## Example Usage

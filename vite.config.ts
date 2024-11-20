@@ -9,8 +9,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, './src/index.ts'),
-      name: 'react-deep-state',
-      fileName: 'react-deep-state'
+      name: 'react-hooks-deep-state',
+      fileName: 'react-hooks-deep-state'
     },
     rollupOptions: {
       // Exclude all peer dependencies from being bundled

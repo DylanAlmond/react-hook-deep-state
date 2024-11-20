@@ -1,21 +1,21 @@
 {
-  "name": "react-deep-state",
+  "name": "react-hooks-deep-state",
   "version": "0.0.0",
   "type": "module",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DylanAlmond/react-deep-state"
+    "url": "https://github.com/DylanAlmond/react-hooks-deep-state"
   },
   "files": [
     "dist"
   ],
-  "main": "./dist/react-deep-state.umd.cjs",
-  "module": "./dist/react-deep-state.js",
+  "main": "./dist/react-hooks-deep-state.umd.cjs",
+  "module": "./dist/react-hooks-deep-state.js",
   "exports": {
     ".": {
-      "require": "./dist/react-deep-state.umd.cjs",
-      "import": "./dist/react-deep-state.js"
+      "require": "./dist/react-hooks-deep-state.umd.cjs",
+      "import": "./dist/react-hooks-deep-state.js"
     }
   },
   "scripts": {
