@@ -1,3 +1,8 @@
+![NPM Version](https://img.shields.io/npm/v/react-hook-deep-state)
+![NPM Last Update](https://img.shields.io/npm/last-update/react-hook-deep-state)
+![NPM Type Definitions](https://img.shields.io/npm/types/react-hook-deep-state)
+![NPM Downloads](https://img.shields.io/npm/dw/react-hook-deep-state)
+
 # React Hook Deep State
 
 Simple React hook for managing state for objects using dot notation.
