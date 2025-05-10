@@ -5,7 +5,7 @@
  * @param value - The value to check.
  * @returns True if the value is an object, false otherwise.
  */
-export function isObject(value: any): value is Record<string, any> {
+export function isObject(value: any): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
@@ -15,19 +15,23 @@ export function isObject(value: any): value is Record<string, any> {
  * @param source - The object to merge changes from.
  * @returns The merged object.
  */
-export function deepMerge(
-  target: Record<string, any>,
-  source: Record<string, any>
-): Record<string, any> {
-  for (const key of Object.keys(source)) {
-    if (isObject(source[key])) {
-      if (!target[key] || !isObject(target[key])) {
-        target[key] = {}; // Create an empty object if it doesn't exist
+export function deepMerge<T extends object, U extends object>(target: T, source: U): T & U {
+  const result = { ...target } as T & U;
+
+  for (const key of Object.keys(source) as Array<keyof U>) {
+    const sourceValue = source[key];
+
+    if (isObject(sourceValue)) {
+      const targetValue = (result as any)[key]; // Temporarily unsafe
+      if (isObject(targetValue)) {
+        (result as any)[key] = deepMerge(targetValue, sourceValue);
+      } else {
+        (result as any)[key] = deepMerge({}, sourceValue);
       }
-      target[key] = deepMerge(target[key], source[key]); // Recursively merge objects
     } else {
-      target[key] = source[key]; // Directly set primitive values
+      (result as any)[key] = sourceValue;
     }
   }
-  return target;
+
+  return result;
 }

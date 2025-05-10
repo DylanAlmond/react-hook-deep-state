@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { act } from 'react';
+import { act, useState } from 'react';
 import useDeepState from '../hooks/useDeepState'; // Adjust the import path if necessary
 
 // @ts-expect-error - Fix `act` not setup error
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-// const ITERATIONS = 50;
+const ITERATIONS = 1000;
 
 const defaultValue = {
   details: {
@@ -20,148 +20,138 @@ const defaultValue = {
   }
 };
 
+type defaultValueType = typeof defaultValue;
+
 // Function to run a performance test multiple times and collect statistics
-// function measurePerformance(hook: () => any, updateFn: (result: any) => void, iterations: number) {
-//   const times: number[] = [];
-//   let firstOutput;
+function measurePerformance(hook: () => any, updateFn: (result: any) => void, iterations: number) {
+  const times: number[] = [];
+  let firstOutput;
 
-//   for (let i = 0; i < iterations; i++) {
-//     const { result } = renderHook(hook);
+  for (let i = 0; i < iterations; i++) {
+    const { result } = renderHook(hook);
 
-//     const start = performance.now();
-//     act(() => {
-//       updateFn(result);
-//     });
-//     const end = performance.now();
+    const start = performance.now();
+    act(() => {
+      updateFn(result);
+    });
+    const end = performance.now();
 
-//     times.push(end - start);
+    times.push(end - start);
 
-//     if (i === 0) {
-//       firstOutput = result.current[0];
-//     }
-//   }
+    if (i === 0) {
+      firstOutput = result.current[0];
+    }
+  }
 
-//   const averageTime = times.reduce((sum, time) => sum + time, 0) / times.length;
-//   const lowestTime = Math.min(...times);
-//   const highestTime = Math.max(...times);
+  const averageTime = times.reduce((sum, time) => sum + time, 0) / times.length;
+  const lowestTime = Math.min(...times);
+  const highestTime = Math.max(...times);
 
-//   return {
-//     averageTime: averageTime.toFixed(2) + 'ms',
-//     lowestTime: lowestTime.toFixed(2) + 'ms',
-//     highestTime: highestTime.toFixed(2) + 'ms',
-//     output: firstOutput
-//   };
-// }
+  return {
+    averageTime: averageTime.toFixed(2) + 'ms',
+    lowestTime: lowestTime.toFixed(2) + 'ms',
+    highestTime: highestTime.toFixed(2) + 'ms',
+    output: firstOutput
+  };
+}
 
-// describe('useDeepState vs useState performance', () => {
-//   test('useState performance', () => {
-//     const stats = measurePerformance(
-//       () => useState(defaultValue),
-//       (result) => {
-//         result.current[1]({
-//           ...result.current[0],
-//           details: {
-//             ...result.current[0].details,
-//             name: 'Dave',
-//             contact: {
-//               ...result.current[0].details.contact,
-//               email: 'dave@example.com'
-//             }
-//           }
-//         });
-//       },
-//       ITERATIONS
-//     );
-//     console.log(`useState performance: `, stats);
-//   });
+describe('useDeepState vs useState performance', () => {
+  test('useState performance', () => {
+    const stats = measurePerformance(
+      () => useState(defaultValue),
+      (result) => {
+        result.current[1]({
+          ...result.current[0],
+          details: {
+            ...result.current[0].details,
+            name: 'Dave',
+            contact: {
+              ...result.current[0].details.contact,
+              email: 'dave@example.com'
+            }
+          }
+        });
+      },
+      ITERATIONS
+    );
 
-//   test('useDeepState performance (merge)', () => {
-//     const stats = measurePerformance(
-//       () => useDeepState(defaultValue),
-//       (result) => {
-//         result.current[1](
-//           'details',
-//           {
-//             name: 'Dave',
-//             contact: {
-//               email: 'dave@example.com'
-//             }
-//           },
-//           true
-//         );
-//       },
-//       ITERATIONS
-//     );
+    console.log('useState performance: ');
+    console.dir(stats, { depth: null });
+  });
 
-//     console.log(`useDeepState performance (merge): `, stats);
-//   });
+  test('useDeepState performance (merge)', () => {
+    const stats = measurePerformance(
+      () => useDeepState(defaultValue),
+      (result) => {
+        result.current[1]({
+          path: 'details',
+          value: {
+            name: 'Dave',
+            contact: {
+              email: 'dave@example.com'
+            }
+          },
+          merge: true
+        });
+      },
+      ITERATIONS
+    );
 
-//   test('useDeepState performance (override)', () => {
-//     const stats = measurePerformance(
-//       () => useDeepState(defaultValue),
-//       (result) => {
-//         result.current[1](
-//           'details',
-//           {
-//             name: 'Dave',
-//             contact: {
-//               email: 'dave@example.com'
-//             }
-//           },
-//           false
-//         );
-//       },
-//       ITERATIONS
-//     );
+    console.log('useDeepState performance (merge): ');
+    console.dir(stats, { depth: null });
+  });
 
-//     console.log(`useDeepState performance (override): `, stats);
-//   });
-// });
+  test('useDeepState performance (override)', () => {
+    const stats = measurePerformance(
+      () => useDeepState(defaultValue),
+      (result) => {
+        result.current[1]({
+          path: 'details',
+          value: {
+            name: 'Dave',
+            contact: {
+              email: 'dave@example.com'
+            }
+          },
+          merge: true
+        });
+      },
+      ITERATIONS
+    );
+
+    console.log('useDeepState performance (no-merge): ');
+    console.dir(stats, { depth: null });
+  });
+});
 
 describe('useDeepState', () => {
-  it('should return the initial state', () => {
+  it('should return initial state', () => {
     const { result } = renderHook(() => useDeepState(defaultValue));
 
     expect(result.current[0]).toBe(defaultValue);
   });
 
-  it('should allow the initial state to be undefined', () => {
+  it('should allow initial state to be undefined', () => {
     const { result } = renderHook(() => useDeepState(undefined));
 
     expect(result.current[0]).toBe(undefined);
   });
 
-  it('should update the existing state to a string', () => {
-    const { result } = renderHook(() => useDeepState(defaultValue));
+  it('should allow null type to be set if specified', () => {
+    const { result } = renderHook(() => useDeepState<defaultValueType | null>(defaultValue));
 
     act(() => {
-      result.current[1]('', 'Hello World!'); // We're modifying the root so pass an empty string
+      result.current[1](null);
     });
 
-    expect(result.current[0]).toBe('Hello World!');
+    expect(result.current[0]).toStrictEqual(null);
   });
 
-  it('should update the existing value to undefined', () => {
+  it('should update current state by merging', () => {
     const { result } = renderHook(() => useDeepState(defaultValue));
 
     act(() => {
-      result.current[1]('details.contact', undefined);
-    });
-
-    expect(result.current[0]).toStrictEqual({
-      details: {
-        id: 0,
-        name: 'Bob',
-        contact: undefined
-      }
-    });
-  });
-
-  it('should update the existing value by merging', () => {
-    const { result } = renderHook(() => useDeepState(defaultValue));
-
-    act(() => {
-      result.current[1]('details', { name: 'Dave' }); // `Merge` should be true by default
+      result.current[1]({ path: 'details', value: { name: 'Dave' } }); // `Merge` should be true by default
     });
 
     expect(result.current[0]).toStrictEqual({
@@ -176,17 +166,20 @@ describe('useDeepState', () => {
     });
   });
 
-  it('should deep merge child objects', () => {
+  it('should deep merge state', () => {
     const { result } = renderHook(() => useDeepState(defaultValue));
 
     act(() => {
-      result.current[1]('details', {
-        id: 1,
-        name: 'Dave',
-        contact: {
-          email: 'dave@example.com',
-          address: 'White House'
-        }
+      result.current[1]({
+        path: 'details',
+        value: {
+          id: 1,
+          name: 'Dave',
+          contact: {
+            email: 'dave@example.com'
+          }
+        },
+        merge: true
       });
     });
 
@@ -196,30 +189,21 @@ describe('useDeepState', () => {
         name: 'Dave',
         contact: {
           email: 'dave@example.com',
-          tel: '123 456 7890',
-          address: 'White House'
+          tel: '123 456 7890'
         }
       }
     });
   });
 
-  it('should update the existing value without merging', () => {
+  it('should update current state without merging', () => {
     const { result } = renderHook(() => useDeepState(defaultValue));
 
     act(() => {
-      result.current[1]('details', { id: 1, phone: '1234' }, false);
-    });
-
-    expect(result.current[0]).toStrictEqual({
-      details: { id: 1, phone: '1234' }
-    });
-  });
-
-  it('should not merge any changes if the existing value is not an object', () => {
-    const { result } = renderHook(() => useDeepState(defaultValue));
-
-    act(() => {
-      result.current[1]('details.contact.email', 'dave@example.com'); // `Merge` should be true by default
+      result.current[1]({
+        path: 'details.contact',
+        value: { email: 'dave@example.com', tel: '123 456 7890' },
+        merge: false
+      });
     });
 
     expect(result.current[0]).toStrictEqual({
@@ -232,5 +216,17 @@ describe('useDeepState', () => {
         }
       }
     });
+  });
+
+  it('should not merge any changes if the current state is not an object', () => {
+    // @ts-expect-error yeah
+    const { result } = renderHook(() => useDeepState<defaultValueType | string>('undefined'));
+
+    act(() => {
+      // @ts-expect-error - We are rightly pointing out a type error, however we want to test a type mismatch on purpose
+      result.current[1]({ path: 'details.contact.email', value: 'dave@example.com' }); // `Merge` should be true by default
+    });
+
+    expect(result.current[0]).toStrictEqual('undefined');
   });
 });

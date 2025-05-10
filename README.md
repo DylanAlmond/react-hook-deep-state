@@ -13,14 +13,18 @@ Simple React hook for managing state for objects using dot notation.
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Installation](#installation)
-  - [Example Usage](#example-usage)
   - [API](#api)
     - [`useDeepState<T>(initialState?: T)`](#usedeepstatetinitialstate-t)
-    - [`setDeepState(path: string, value: any, merge: boolean = true)`](#setdeepstatepath-string-value-any-merge-boolean--true)
-  - [Advanced Features](#advanced-features)
-    - [Object Merging](#object-merging)
-    - [Override](#override)
-  - [Notes](#notes)
+    - [`setDeepState(update: StateUpdate<T, P, M> | T)`](#setdeepstateupdate-stateupdatet-p-m--t)
+      - [`StateUpdate<P, M>`](#stateupdatep-m)
+    - [Examples](#examples)
+      - [Replace the Entire State](#replace-the-entire-state)
+      - [Update a Nested Property](#update-a-nested-property)
+      - [Merge a Nested Object](#merge-a-nested-object)
+      - [Override a Nested Object](#override-a-nested-object)
+  - [Running the Example Project](#running-the-example-project)
+    - [Steps to Run the Example:](#steps-to-run-the-example)
+  - [License](#license)
 
 ## Features
 
@@ -34,95 +38,110 @@ Simple React hook for managing state for objects using dot notation.
 yarn add react-hook-deep-state
 ```
 
-## Example Usage
-
-```tsx
-import { useDeepState } from 'react-hook-deep-state';
-
-const defaultUser = {
-  details: {
-    id: 0,
-    name: 'Bob',
-    contact: {
-      email: 'bob@example.com'
-    }
-  }
-};
-
-function App() {
-  const [user, updateUser] = useDeepState(defaultUser);
-
-  return (
-    <div>
-      <button onClick={() => updateUser('details.id', user.details.id + 1)}>
-        ID is {user.details.id}
-      </button>
-
-      <input
-        type='text'
-        value={user.details.name}
-        onChange={(e) => updateUser('details.name', e.target.value)}
-      />
-
-      <input
-        type='email'
-        value={user.details.contact.email}
-        onChange={(e) => updateUser('details.contact', { email: e.target.value })}
-      />
-
-      <p>{JSON.stringify(user.details)}</p>
-    </div>
-  );
-}
-
-export default App;
-```
-
 ## API
 
 ### `useDeepState<T>(initialState?: T)`
 
 **Arguments**:
 
-- `initialState` _(optional)_: An initial state object of type `T`. Defaults to an empty object if not provided.
+- `initialState` _(optional)_: An initial state object of type `T`. Defaults to `undefined` if not provided.
 
 **Returns**: A tuple `[state, setDeepState]`
 
-- `state`: The current state object.
+- `state`: The current state object of type `T`.
 - `setDeepState`: A function to update the state at a specific path.
 
 ---
 
-### `setDeepState(path: string, value: any, merge: boolean = true)`
+### `setDeepState(update: StateUpdate<T, P, M> | T)`
 
 **Arguments**:
 
-- `path`: A string specifying the path to the property (e.g., `"user.profile.name"`).
-- `value`: The new value to set at the specified path.
-- `merge` _(optional)_: Whether to merge the new value with the existing one if it's an object. Defaults to `true`.
+- `update`: The update object or the new state. It can be:
+  - A plain object of type `T` to replace or merge the entire state.
+  - A `StateUpdate` object to update a specific path.
 
-## Advanced Features
+#### `StateUpdate<P, M>`
 
-### Object Merging
+A `StateUpdate` object has the following properties:
 
-By default, if you provide an object to `setDeepState` with `merge` set to `true`, it will merge the new object with the existing one:
+- `path`: A string `P` specifying the path to the property (e.g., `"nested.key"`).
+- `value`: The value to assign at the given path. If `merge` is `false`, the type of `value` must exactly match the existing property's type. If merge is true, `value` will be a `deep partial` of that type.
+- `merge` _(optional)_: A boolean `M` indicating whether to merge objects at the path. Defaults to `true`.
+
+---
+
+### Examples
+
+#### Replace the Entire State
 
 ```tsx
-// Merges 'phone' into the existing 'contact' object
-updateUser('details.contact', { phone: '123-456-7890' });
+setDeepState({ key: 'value' });
 ```
 
-### Override
-
-To replace the current value entirely, set `merge` to `false`:
+#### Update a Nested Property
 
 ```tsx
-// Replaces the 'contact' object with the new one
-updateUser('details.contact', { phone: '123-456-7890' }, true);
+setDeepState({ path: 'nested.key', value: 'newValue' });
 ```
 
-## Notes
+#### Merge a Nested Object
 
-- Symbol keys are **not supported**.
-- Avoid direct mutation of the returned state object; always use `setDeepState`.
+```tsx
+setDeepState({
+  path: 'nested.key',
+  value: { subKey: 'newValue' }, // A deep partial type
+  merge: true // Default behavior
+});
+```
 
+#### Override a Nested Object
+
+```tsx
+setDeepState({
+  path: 'nested.key',
+  value: { subKey: 'newValue', subKey2: 123 }, // A "full" type
+  merge: false
+});
+```
+
+## Running the Example Project
+
+To see `react-hook-deep-state` in action, you can run the example project included in this repository.
+
+### Steps to Run the Example:
+
+1. **Install Dependencies**:
+   Navigate to the root of the project and install the dependencies:
+
+   ```bash
+   yarn install
+   ```
+
+2. **Navigate to the Example Folder**:
+   Move into the `example` folder:
+
+   ```bash
+   cd example
+   ```
+
+3. **Install Example Dependencies**:
+   Install the dependencies for the example project:
+
+   ```bash
+   yarn install
+   ```
+
+4. **Start the Development Server**:
+   Run the example project:
+
+   ```bash
+   yarn dev
+   ```
+
+5. **View in Browser**:
+   Open your browser and navigate to `http://localhost:5173` to interact with the example project.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

@@ -1,86 +1,101 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { deepMerge, isObject } from '../util';
-
-// type Join<K, P> = K extends string | number
-//   ? P extends string | number
-//     ? `${K}.${P}`
-//     : never
-//   : never;
-
-// type Paths<T> = T extends object
-//   ? {
-//       [K in keyof T]: K extends string
-//         ? T[K] extends Record<string, any>
-//           ? K | Join<K, Paths<T[K]>>
-//           : K
-//         : never;
-//     }[keyof T]
-//   : never;
+import { isPathUpdate, StateType, StateUpdate } from '../types';
 
 /**
- * A custom hook for managing deeply nested state objects.
- * @param initialState - The initial state, optional and can be undefined.
- * @returns An array containing the current state and a function to update it.
+ * A custom hook for managing deeply nested state objects with type safety.
+ * @param initialState - The initial state object
+ * @returns [state, setState] tuple with strongly typed path-based setter
  */
-function useDeepState<T extends Record<string, any> | any>(initialState?: T) {
+function useDeepState<T extends StateType>(initialState?: T) {
   const [state, setState] = useState<T>(initialState as T);
 
   /**
-   * Updates the state at a specific path using dot notation.
-   * @param path - Dot-notated path to the property (e.g., "user.profile.name"). If empty or undefined, updates the root.
-   * @param value - New value to set at the specified path.
-   * @param merge - If the property is an object, should we merge the value?
+   * Updates the state either entirely or at a specific path.
+   *
+   * - If the `update` parameter is a plain object, it replaces or merges with the entire state.
+   * - If the `update` parameter contains a `path`, it updates the state at the specified path.
+   *
+   * @template P - The type of the path string.
+   * @template M - A boolean indicating whether to merge objects at the path.
+   * @param update - The update object or the new state. If an object with a `path` is provided,
+   *                 it updates the state at the specified path. Otherwise, it replaces or merges
+   *                 the entire state.
+   *
+   * @example
+   * // Replace the entire state
+   * setDeepState({ key: 'value' });
+   *
+   * @example
+   * // Update a nested property
+   * setDeepState({ path: 'nested.key', value: 'newValue' });
+   *
+   * @example
+   * // Merge a nested object
+   * setDeepState({ path: 'nested.key', value: { subKey: 'newValue' }, merge: true });
+   *
+   * @example
+   * // Override a nested object
+   * setDeepState({
+   *  path: 'nested.key',
+   *  value: { subKey: 'newValue', subKey2: 123 },
+   *  merge: false
+   * });
    */
-  const setDeepState = useCallback(
-    (path?: string /*Paths<T>*/, value?: any, merge: boolean = true) => {
+  const setDeepState = <P extends string, M extends boolean>(update: StateUpdate<T, P, M> | T) => {
+    // Case 1: No path provided, update the entire state
+    if (!isObject(update) || !('value' in update)) {
       setState((prevState) => {
-        // If no path is provided, update the root
-        if (!path) {
-          if (merge && isObject(prevState) && isObject(value)) {
-            return deepMerge({ ...prevState }, value); // Deep merge at the root
-          }
-          return value as T;
+        const newValue = update as T;
+
+        // Check we're merging two objects
+        if (isObject(prevState) && isObject(newValue)) {
+          return deepMerge({ ...prevState }, newValue);
         }
 
-        // If our state is not an object, replace with the new value
+        return newValue;
+      });
+      return;
+    }
+
+    // Handle object-based update configuration
+    if (isPathUpdate(update)) {
+      // Path-based update
+      const { path, value, merge = true } = update;
+
+      setState((prevState) => {
+        // If our current state is not an object type, make no changes
         if (!isObject(prevState)) {
-          return value;
+          console.warn(`Attempting to set key value pair to invalid type "${typeof prevState}"`);
+          return prevState;
         }
 
-        const keys = path.split('.') as (keyof any)[];
-        const newState = structuredClone(prevState); // Deep clone the root state
-        let currentScope: Record<string, any> = newState; // Start at the root of the object
+        const keys = path.split('.');
 
-        for (let i = 0; i < keys.length; i++) {
+        const newState = structuredClone(prevState);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let current = newState as Record<string, any>;
+
+        for (let i = 0; i < keys.length - 1; i++) {
           const key = keys[i];
+          // Initialize missing objects in the path
+          if (!isObject(current[key])) current[key] = {};
+          current = current[key];
+        }
 
-          if (typeof key === 'symbol') {
-            throw new Error('Symbol keys are not supported');
-          }
+        const lastKey = keys[keys.length - 1];
 
-          if (i === keys.length - 1) {
-            // If merging, perform deep merge
-            if (merge && isObject(currentScope[key]) && isObject(value)) {
-              currentScope[key] = deepMerge(currentScope[key], value);
-            } else {
-              currentScope[key] = value; // Otherwise just set the value
-            }
-          } else {
-            // Initialize the current key as an empty object if it doesn't exist
-            if (!isObject(currentScope[key])) {
-              currentScope[key] = {};
-            }
-
-            currentScope = currentScope[key]; // Drill down into the object
-          }
+        // Apply value at the final path destination
+        if (merge && isObject(current[lastKey]) && isObject(value)) {
+          current[lastKey] = deepMerge(current[lastKey], value);
+        } else {
+          current[lastKey] = value;
         }
 
         return newState;
       });
-    },
-    []
-  );
+    }
+  };
 
   return [state, setDeepState] as const;
 }
