@@ -106,6 +106,8 @@ const App = () => {
     </div>
   );
 };
+
+export default App;
 ```
 
 #### Updating the Entire State

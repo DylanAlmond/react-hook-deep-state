@@ -39,8 +39,6 @@ const App = () => {
 
   // For Preview Component
   const setDeepState: typeof _setDeepState = (value, path, merge) => {
-    console.log(value, path, merge);
-
     setLastChanges({ path: path, merge: merge, value: value });
     _setDeepState(value, path, merge);
   };
