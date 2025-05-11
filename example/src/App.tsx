@@ -3,15 +3,16 @@ import useDeepState from '../../src/hooks/useDeepState';
 import './index.css';
 import Preview from './Preview';
 import type { StateUpdate } from '../../src/types';
+// import { useDeepState } from 'react-hook-deep-state';
 
 // Example Type
 type UserData = {
   user: {
     name: string;
     address: {
-      city: 'London' | 'Berlin' | 'Tokyo' | 'Canberra';
+      city: 'London' | 'Berlin' | 'Tokyo' | 'Canberra' | 'Seoul';
       zip: string;
-      country?: 'GBR' | 'GER' | 'JPN' | 'AUS';
+      country?: 'GBR' | 'GER' | 'JPN' | 'AUS' | 'KOR';
     };
     active: boolean;
   };
@@ -24,7 +25,8 @@ const App = () => {
       name: 'John Doe',
       address: {
         city: 'London',
-        zip: '10001'
+        zip: '10001',
+        country: 'GBR'
       },
       active: true
     }
@@ -36,59 +38,70 @@ const App = () => {
   );
 
   // For Preview Component
-  const setDeepState: typeof _setDeepState = (params) => {
-    setLastChanges(params);
-    _setDeepState(params);
+  const setDeepState: typeof _setDeepState = (value, path, merge) => {
+    console.log(value, path, merge);
+
+    // @ts-expect-error - out of date!
+    setLastChanges({ path: path, merge: merge, value: value });
+    _setDeepState(value, path, merge);
   };
 
-  const updateEntireState = () => {
-    setDeepState({
-      user: {
-        name: 'Jane Doe',
-        address: {
-          city: 'Canberra',
-          zip: '90001'
-        },
-        active: true
-      }
-    });
+  const mergeEntireState = () => {
+    setDeepState(
+      {
+        user: {
+          name: 'Jane Doe',
+          address: {
+            city: 'Seoul',
+            zip: '43262'
+          },
+          active: true
+        }
+      },
+      '',
+      true
+    );
+  };
+
+  const overrideEntireState = () => {
+    setDeepState(
+      {
+        user: {
+          name: 'Jane Doe',
+          address: {
+            city: 'Canberra',
+            zip: '90001'
+          },
+          active: true
+        }
+      },
+      '',
+      false
+    );
   };
 
   const updateNestedProperty = () => {
-    setDeepState({
-      path: 'user.address.city',
-      value: 'Tokyo'
-    });
+    setDeepState('Tokyo', 'user.address.city');
   };
 
   const toggleNestedProperty = () => {
-    setDeepState({
-      path: 'user.active',
-      value: !state.user.active
-    });
+    setDeepState(!state.user.active, 'user.active');
   };
 
   const mergeNestedObject = () => {
-    setDeepState({
-      path: 'user.address',
-      value: { zip: '94101', country: 'AUS' },
-      merge: true
-    });
+    setDeepState({ zip: '94101', country: 'AUS' }, 'user.address', true);
   };
 
   const overrideNestedObject = () => {
-    setDeepState({
-      path: 'user.address',
-      value: { city: 'Berlin', zip: '12345' },
-      merge: false
-    });
+    setDeepState({ city: 'Berlin', zip: '12345' }, 'user.address', false);
   };
 
   return (
     <div>
       <h1>react-hook-deep-state Demo</h1>
       <Preview state={state} changes={lastChanges} />
-      <button onClick={updateEntireState}>Update Entire State</button>
+      <button onClick={mergeEntireState}>Merge Entire State</button>
+      <button onClick={overrideEntireState}>Override Entire State</button>
       <button onClick={updateNestedProperty}>Update Nested Property</button>
       <button onClick={toggleNestedProperty}>Toggle Nested Property</button>
       <button onClick={mergeNestedObject}>Merge Nested Object</button>

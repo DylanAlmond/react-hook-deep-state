@@ -7,7 +7,7 @@ import useDeepState from '../hooks/useDeepState'; // Adjust the import path if n
 // @ts-expect-error - Fix `act` not setup error
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-const ITERATIONS = 1000;
+const ITERATIONS = 10000;
 
 const defaultValue = {
   details: {
@@ -147,11 +147,11 @@ describe('useDeepState', () => {
     expect(result.current[0]).toStrictEqual(null);
   });
 
-  it('should update current state by merging', () => {
+  it('should update nested by merging', () => {
     const { result } = renderHook(() => useDeepState(defaultValue));
 
     act(() => {
-      result.current[1]({ path: 'details', value: { name: 'Dave' } }); // `Merge` should be true by default
+      result.current[1]({ name: 'Dave' }, 'details'); // `Merge` should be true by default
     });
 
     expect(result.current[0]).toStrictEqual({
@@ -170,17 +170,17 @@ describe('useDeepState', () => {
     const { result } = renderHook(() => useDeepState(defaultValue));
 
     act(() => {
-      result.current[1]({
-        path: 'details',
-        value: {
+      result.current[1](
+        {
           id: 1,
           name: 'Dave',
           contact: {
             email: 'dave@example.com'
           }
         },
-        merge: true
-      });
+        'details',
+        true
+      );
     });
 
     expect(result.current[0]).toStrictEqual({
@@ -199,11 +199,11 @@ describe('useDeepState', () => {
     const { result } = renderHook(() => useDeepState(defaultValue));
 
     act(() => {
-      result.current[1]({
-        path: 'details.contact',
-        value: { email: 'dave@example.com', tel: '123 456 7890' },
-        merge: false
-      });
+      result.current[1](
+        { email: 'dave@example.com', tel: '123 456 7890' },
+        'details.contact',
+        false
+      );
     });
 
     expect(result.current[0]).toStrictEqual({
@@ -224,7 +224,7 @@ describe('useDeepState', () => {
 
     act(() => {
       // @ts-expect-error - We are rightly pointing out a type error, however we want to test a type mismatch on purpose
-      result.current[1]({ path: 'details.contact.email', value: 'dave@example.com' }); // `Merge` should be true by default
+      result.current[1]('dave@example.com', 'details.contact.email'); // `Merge` should be true by default
     });
 
     expect(result.current[0]).toStrictEqual('undefined');

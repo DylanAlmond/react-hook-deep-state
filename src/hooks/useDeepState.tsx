@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { deepMerge, isObject } from '../util';
-import { isPathUpdate, StateType, StateUpdate } from '../types';
+import { DeepPartial, NestedPaths, Path, StateType } from '../types';
 
 /**
  * A custom hook for managing deeply nested state objects with type safety.
@@ -24,33 +24,47 @@ function useDeepState<T extends StateType>(initialState?: T) {
    *
    * @example
    * // Replace the entire state
-   * setDeepState({ key: 'value' });
+   * setDeepState({ key: 'value' }, '', false);
    *
    * @example
    * // Update a nested property
-   * setDeepState({ path: 'nested.key', value: 'newValue' });
+   * setDeepState('newValue', 'nested.key');
    *
    * @example
    * // Merge a nested object
-   * setDeepState({ path: 'nested.key', value: { subKey: 'newValue' }, merge: true });
+   * setDeepState(
+   *  { subKey: 'newValue' },
+   *  'nested.key',
+   *  true // Default behaviour
+   * );
    *
    * @example
    * // Override a nested object
-   * setDeepState({
-   *  path: 'nested.key',
-   *  value: { subKey: 'newValue', subKey2: 123 },
-   *  merge: false
-   * });
+   * setDeepState(
+   *  { subKey: 'newValue', subKey2: 123 },
+   *  'nested.key',
+   *  false
+   * );
    */
-  const setDeepState = <P extends string, M extends boolean>(update: StateUpdate<T, P, M> | T) => {
+  const setDeepState = <P extends '' | NestedPaths<T> | undefined, M extends boolean>(
+    value: M extends true
+      ? P extends NestedPaths<T>
+        ? DeepPartial<Path<T, P>>
+        : DeepPartial<T>
+      : P extends NestedPaths<T>
+      ? Path<T, P>
+      : T,
+    path?: P,
+    merge?: M
+  ) => {
     // Case 1: No path provided, update the entire state
-    if (!isObject(update) || !('value' in update)) {
+    if (!path) {
       setState((prevState) => {
-        const newValue = update as T;
+        const newValue = value as T;
 
         // Check we're merging two objects
         if (isObject(prevState) && isObject(newValue)) {
-          return deepMerge({ ...prevState }, newValue);
+          return merge ? deepMerge({ ...prevState }, newValue) : newValue;
         }
 
         return newValue;
@@ -59,9 +73,9 @@ function useDeepState<T extends StateType>(initialState?: T) {
     }
 
     // Handle object-based update configuration
-    if (isPathUpdate(update)) {
+    if (path) {
       // Path-based update
-      const { path, value, merge = true } = update;
+      merge = merge == null ? (true as M) : merge;
 
       setState((prevState) => {
         // If our current state is not an object type, make no changes
