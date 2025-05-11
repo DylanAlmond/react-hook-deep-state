@@ -5,7 +5,7 @@
 
 # React Hook Deep State
 
-A tiny React hook for managing state for objects using dot notation.
+A small React hook for managing state for objects using dot notation.
 
 ## Table of Contents
 
@@ -24,7 +24,6 @@ A tiny React hook for managing state for objects using dot notation.
       - [Override a Nested Object](#override-a-nested-object)
       - [Update a Nested Array](#update-a-nested-array)
   - [Running the Example Project](#running-the-example-project)
-    - [Steps to Run the Example:](#steps-to-run-the-example)
   - [License](#license)
 
 ## Features
@@ -158,8 +157,6 @@ setAppState(['Skydiving', 'Hiking'], 'user.hobbies');
 ## Running the Example Project
 
 To see `react-hook-deep-state` in action, you can run the example project included in this repository.
-
-### Steps to Run the Example:
 
 1. **Install Dependencies**:
    Navigate to the root of the project and install the dependencies:
