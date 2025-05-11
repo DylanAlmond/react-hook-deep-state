@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { deepMerge, isObject } from '../util';
-import { DeepPartial, NestedPaths, Path, StateType } from '../types';
+import { NestedPaths, StateType, StateValue } from '../types';
 
 /**
  * A custom hook for managing deeply nested state objects with type safety.
@@ -47,15 +47,9 @@ function useDeepState<T extends StateType>(initialState?: T) {
    * );
    */
   const setDeepState = <P extends '' | NestedPaths<T> | undefined, M extends boolean>(
-    value: M extends true
-      ? P extends NestedPaths<T>
-        ? DeepPartial<Path<T, P>>
-        : DeepPartial<T>
-      : P extends NestedPaths<T>
-      ? Path<T, P>
-      : T,
+    value: StateValue<T, P, M>,
     path?: P,
-    merge?: M
+    merge: M = true as M
   ) => {
     // Case 1: No path provided, update the entire state
     if (!path) {
@@ -74,19 +68,19 @@ function useDeepState<T extends StateType>(initialState?: T) {
 
     // Handle object-based update configuration
     if (path) {
-      // Path-based update
-      merge = merge == null ? (true as M) : merge;
-
       setState((prevState) => {
         // If our current state is not an object type, make no changes
         if (!isObject(prevState)) {
-          console.warn(`Attempting to set key value pair to invalid type "${typeof prevState}"`);
+          console.warn(
+            `Cannot assign key-value pair. State must be of type "object", not "${typeof prevState}"`
+          );
           return prevState;
         }
 
         const keys = path.split('.');
 
         const newState = structuredClone(prevState);
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let current = newState as Record<string, any>;
 

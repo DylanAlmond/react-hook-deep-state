@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import type { StateUpdate } from '../../src/types';
 
 interface PreviewProps<T extends Record<string, any>> {
   state: T;
-  changes: StateUpdate<T, string, boolean> | undefined;
+  changes: { path: string | undefined; merge: boolean | undefined; value: unknown } | undefined;
 }
 
 /**
@@ -31,7 +30,8 @@ const Preview = <T extends Record<string, any>>({ state, changes }: PreviewProps
       value: any,
       level = 0
     ): React.ReactNode => {
-      if (typeof target !== 'object' || target === null) return JSON.stringify(target);
+      if (Array.isArray(target) || typeof target !== 'object' || target === null)
+        return JSON.stringify(target);
 
       const indent = '  '.repeat(level);
       const keys = Object.keys(target);

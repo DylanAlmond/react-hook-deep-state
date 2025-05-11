@@ -2,8 +2,6 @@ import { useState } from 'react';
 import useDeepState from '../../src/hooks/useDeepState';
 import './index.css';
 import Preview from './Preview';
-import type { StateUpdate } from '../../src/types';
-// import { useDeepState } from 'react-hook-deep-state';
 
 // Example Type
 type UserData = {
@@ -15,6 +13,7 @@ type UserData = {
       country?: 'GBR' | 'GER' | 'JPN' | 'AUS' | 'KOR';
     };
     active: boolean;
+    hobbies: string[];
   };
 };
 
@@ -28,20 +27,20 @@ const App = () => {
         zip: '10001',
         country: 'GBR'
       },
-      active: true
+      active: true,
+      hobbies: ['Reading', 'Hiking', 'Gaming']
     }
   });
 
   // For Preview Component
-  const [lastChanges, setLastChanges] = useState<UserData | StateUpdate<UserData> | undefined>(
-    undefined
-  );
+  const [lastChanges, setLastChanges] = useState<
+    { path: string | undefined; merge: boolean | undefined; value: unknown } | undefined
+  >(undefined);
 
   // For Preview Component
   const setDeepState: typeof _setDeepState = (value, path, merge) => {
     console.log(value, path, merge);
 
-    // @ts-expect-error - out of date!
     setLastChanges({ path: path, merge: merge, value: value });
     _setDeepState(value, path, merge);
   };
@@ -72,7 +71,8 @@ const App = () => {
             city: 'Canberra',
             zip: '90001'
           },
-          active: true
+          active: true,
+          hobbies: ['Gaming', 'Skiing']
         }
       },
       '',
@@ -96,19 +96,43 @@ const App = () => {
     setDeepState({ city: 'Berlin', zip: '12345' }, 'user.address', false);
   };
 
+  const updateNestedArray = () => {
+    const updatedHobbies = [...state.user.hobbies];
+    updatedHobbies[0] = 'Skydiving';
+    setDeepState(updatedHobbies, 'user.hobbies');
+  };
+
   return (
     <div>
       <h1>react-hook-deep-state Demo</h1>
       <Preview state={state} changes={lastChanges} />
+
+      <div>
+        <label htmlFor='name'>Set Name:</label>
+        <input
+          type='text'
+          id='name'
+          name='name'
+          value={state.user.name}
+          onInput={(e) => setDeepState(e.currentTarget.value, 'user.name')}
+        />
+      </div>
+
       <button onClick={mergeEntireState}>Merge Entire State</button>
       <button onClick={overrideEntireState}>Override Entire State</button>
       <button onClick={updateNestedProperty}>Update Nested Property</button>
       <button onClick={toggleNestedProperty}>Toggle Nested Property</button>
       <button onClick={mergeNestedObject}>Merge Nested Object</button>
       <button onClick={overrideNestedObject}>Override Nested Object</button>
+      <button onClick={updateNestedArray}>Update Nested Array</button>
+
+      <p>
+        <b>Disclaimer:</b> This project is not affiliated with the Illuminati, any government, or
+        other "deep state" entities. It is purely a tool for managing deeply nested state in React
+        applications.
+      </p>
     </div>
   );
 };
 
 export default App;
-

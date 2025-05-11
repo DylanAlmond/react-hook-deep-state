@@ -1513,11 +1513,6 @@ react-dom@^19.1.0:
   dependencies:
     scheduler "^0.26.0"
 
-react-hook-deep-state@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/react-hook-deep-state/-/react-hook-deep-state-1.0.0.tgz#df8bea602f9314e785f7e48d17a3c10f50c5bed2"
-  integrity sha512-4HkHuwHfUfIM7CNHJvDvBNiINNyjkEbaxUdp5jQqaBW/c02x/997GlMyZd7HXcuIC3e7eflAk1pDQCwIs62SoA==
-
 react@^19.1.0:
   version "19.1.0"
   resolved "https://registry.yarnpkg.com/react/-/react-19.1.0.tgz#926864b6c48da7627f004795d6cce50e90793b75"
