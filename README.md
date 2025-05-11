@@ -5,7 +5,7 @@
 
 # React Hook Deep State
 
-Simple React hook for managing state for objects using dot notation.
+A tiny React hook for managing state for objects using dot notation.
 
 ## Table of Contents
 
@@ -15,13 +15,14 @@ Simple React hook for managing state for objects using dot notation.
   - [Installation](#installation)
   - [API](#api)
     - [`useDeepState<T>(initialState?: T)`](#usedeepstatetinitialstate-t)
-    - [`setDeepState(update: StateUpdate<T, P, M> | T)`](#setdeepstateupdate-stateupdatet-p-m--t)
-      - [`StateUpdate<P, M>`](#stateupdatep-m)
+    - [`setDeepState(value: StateValue<T, P, M>, path?: P, merge?: M)`](#setdeepstatevalue-statevaluet-p-m-path-p-merge-m)
     - [Examples](#examples)
-      - [Replace the Entire State](#replace-the-entire-state)
+      - [Usage](#usage)
+      - [Updating the Entire State](#updating-the-entire-state)
       - [Update a Nested Property](#update-a-nested-property)
       - [Merge a Nested Object](#merge-a-nested-object)
       - [Override a Nested Object](#override-a-nested-object)
+      - [Update a Nested Array](#update-a-nested-array)
   - [Running the Example Project](#running-the-example-project)
     - [Steps to Run the Example:](#steps-to-run-the-example)
   - [License](#license)
@@ -53,56 +54,105 @@ yarn add react-hook-deep-state
 
 ---
 
-### `setDeepState(update: StateUpdate<T, P, M> | T)`
+### `setDeepState(value: StateValue<T, P, M>, path?: P, merge?: M)`
 
 **Arguments**:
 
-- `update`: The update object or the new state. It can be:
-  - A plain object of type `T` to replace or merge the entire state.
-  - A `StateUpdate` object to update a specific path.
-
-#### `StateUpdate<P, M>`
-
-A `StateUpdate` object has the following properties:
-
-- `path`: A string `P` specifying the path to the property (e.g., `"nested.key"`).
-- `value`: The value to assign at the given path. If `merge` is `false`, the type of `value` must exactly match the existing property's type. If merge is true, `value` will be a `deep partial` of that type.
-- `merge` _(optional)_: A boolean `M` indicating whether to merge objects at the path. Defaults to `true`.
+- `value`: The new value to set. The type of `value` depends on the `path` and `merge` parameters:
+  - If `merge` is `true`, `value` can be a deep partial object for merging.
+  - If `merge` is `false`, `value` must match the exact type of the property at the specified path.
+- `path` _(optional)_: A string specifying the path to the property (e.g., `"nested.key"`). If omitted or `""`, the entire state is updated.
+- `merge` _(optional)_: A boolean indicating whether to merge objects at the specified path. Defaults to `true`.
 
 ---
 
 ### Examples
 
-#### Replace the Entire State
+#### Usage
 
 ```tsx
-setDeepState({ key: 'value' });
+import React from 'react';
+import { useDeepState } from 'react-hook-deep-state';
+
+const App = () => {
+  const [appState, setAppState] = useDeepState({
+    user: {
+      name: 'John Doe',
+      address: {
+        city: 'London',
+        zip: '76321',
+        country: 'GBR'
+      },
+      active: false,
+      hobbies: []
+    }
+  });
+
+  return (
+    <div>
+      <p>City: {appState.user.address.city}</p>
+      <p>Active: {appState.user.active ? 'Yes' : 'No'}</p>
+
+      <div>
+        <label htmlFor='name'>Set Name:</label>
+        <input
+          type='text'
+          id='name'
+          name='name'
+          value={appState.user.name}
+          onInput={(e) => setAppState(e.currentTarget.value, 'user.name')}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default App;
+```
+
+#### Updating the Entire State
+
+```tsx
+setAppState(
+  {
+    user: {
+      name: 'Jane Doe',
+      address: {
+        city: 'Berlin',
+        zip: '12345',
+        country: 'GER'
+      },
+      active: true,
+      hobbies: ['Cycling', 'Swimming']
+    }
+  },
+  '', // or undefined
+  true // Merge by default, set to false to override current value
+);
 ```
 
 #### Update a Nested Property
 
 ```tsx
-setDeepState({ path: 'nested.key', value: 'newValue' });
+setAppState('Tokyo', 'user.address.city');
 ```
 
 #### Merge a Nested Object
 
 ```tsx
-setDeepState({
-  path: 'nested.key',
-  value: { subKey: 'newValue' }, // A deep partial type
-  merge: true // Default behavior
-});
+setAppState({ zip: '94101', country: 'JAP' }, 'user.address', true);
 ```
 
 #### Override a Nested Object
 
 ```tsx
-setDeepState({
-  path: 'nested.key',
-  value: { subKey: 'newValue', subKey2: 123 }, // A "full" type
-  merge: false
-});
+setAppState({ city: 'Canberra', zip: '90001', country: 'AUS' }, 'user.address', false);
+```
+
+#### Update a Nested Array
+
+```tsx
+setAppState(['Skydiving', 'Hiking'], 'user.hobbies');
 ```
 
 ## Running the Example Project
@@ -145,3 +195,7 @@ To see `react-hook-deep-state` in action, you can run the example project includ
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+---
+
+**Disclaimer**: This project is not affiliated with the Illuminati, any government, or other "deep state" entities. It is purely a tool for managing deeply nested state in React applications.

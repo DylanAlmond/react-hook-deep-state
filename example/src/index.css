@@ -3,3 +3,8 @@
   transition: background-color 0.3s ease;
 }
 
+.no-update {
+  background-color: white;
+  transition: background-color 0.3s ease;
+}
+
