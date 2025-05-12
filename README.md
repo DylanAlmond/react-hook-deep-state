@@ -5,7 +5,7 @@
 
 # React Hook Deep State
 
-A small React hook for managing state for objects using dot notation.
+A small React hook for managing deeply nested state objects with type safety.
 
 ## Table of Contents
 
