@@ -1,6 +1,6 @@
 {
   "name": "react-hook-deep-state",
-  "version": "1.1.1",
+  "version": "1.1.3",
   "type": "module",
   "license": "MIT",
   "author": {
@@ -12,11 +12,19 @@
     "type": "git",
     "url": "https://github.com/DylanAlmond/react-hook-deep-state"
   },
+  "keywords": [
+    "react",
+    "hook",
+    "state",
+    "object-state",
+    "typescript"
+  ],
   "files": [
     "dist"
   ],
   "main": "./dist/react-hook-deep-state.umd.cjs",
   "module": "./dist/react-hook-deep-state.js",
+  "types": "./dist/react-hook-deep-state.d.ts",
   "exports": {
     ".": {
       "require": "./dist/react-hook-deep-state.umd.cjs",
