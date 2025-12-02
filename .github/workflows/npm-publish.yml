@@ -16,10 +16,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: "yarn"
           registry-url: https://registry.npmjs.org/
-      - run: npm install --force
-      - run: npm test
-      - run: npm run build
-      - run: npm publish
+
+      - run: yarn install
+      - run: yarn test
+      - run: yarn build
+      - run: yarn npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
