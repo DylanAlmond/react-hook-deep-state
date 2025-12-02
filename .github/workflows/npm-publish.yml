@@ -10,18 +10,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
+      - name: Enable corepack for yarn 4
+        run: corepack enable
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "yarn"
           registry-url: https://registry.npmjs.org/
 
-      - name: Enable corepack for yarn 4
-        run: corepack enable
+      - run: yarn -v
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
 
       - name: Lint
         run: yarn lint
@@ -37,6 +39,6 @@ jobs:
         run: yarn build
 
       - name: Publish to NPM
-        run: yarn npm publish
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
