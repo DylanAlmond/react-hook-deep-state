@@ -3,14 +3,11 @@ import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { defineConfig } from 'eslint/config';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-export default tseslint.config(
+export default defineConfig(
   {
-    ignores: ['dist', 'example']
+    ignores: ['dist', 'example', 'coverage']
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
@@ -19,8 +16,7 @@ export default tseslint.config(
       ecmaVersion: 2020,
       globals: globals.browser,
       parserOptions: {
-        project: ['./tsconfig.json'],
-        tsconfigRootDir: __dirname
+        projectService: true
       }
     },
     plugins: {
